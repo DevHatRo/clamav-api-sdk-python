@@ -172,22 +172,28 @@ def _chunk_iter(
     filename: str,
     chunk_size: int,
 ) -> Iterator[clamav_pb2.ScanStreamRequest]:
-    """Yield ``ScanStreamRequest`` messages for a single file."""
-    stream: BinaryIO = io.BytesIO(data) if isinstance(data, bytes) else data
-    chunks: list[bytes] = []
-    while True:
-        piece = stream.read(chunk_size)
-        if not piece:
-            break
-        chunks.append(piece)
+    """Yield ``ScanStreamRequest`` messages for a single file.
 
-    for idx, chunk in enumerate(chunks):
-        is_last = idx == len(chunks) - 1
+    Uses a one-chunk look-ahead so that ``is_last`` can be set on the final
+    message without buffering the entire payload in memory.
+    """
+    stream: BinaryIO = io.BytesIO(data) if isinstance(data, bytes) else data
+    prev_chunk = stream.read(chunk_size)
+    if not prev_chunk:
+        return
+    idx = 0
+    while True:
+        next_chunk = stream.read(chunk_size)
+        is_last = not next_chunk
         yield clamav_pb2.ScanStreamRequest(
-            chunk=chunk,
+            chunk=prev_chunk,
             filename=filename if idx == 0 else "",
             is_last=is_last,
         )
+        if is_last:
+            break
+        prev_chunk = next_chunk
+        idx += 1
 
 
 def _to_scan_result(resp: clamav_pb2.ScanResponse) -> ScanResult:
