@@ -13,7 +13,4 @@ def sample_bytes() -> bytes:
 @pytest.fixture()
 def eicar_bytes() -> bytes:
     """EICAR anti-malware test string (safe; every AV recognises it)."""
-    return (
-        b"X5O!P%@AP[4\\PZX54(P^)7CC)7}$"
-        b"EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*"
-    )
+    return b"X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*"

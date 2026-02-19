@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import tempfile
 
-import httpx
 import pytest
 import respx
 
@@ -34,9 +33,7 @@ class TestHealthCheck:
 
     @respx.mock
     async def test_unhealthy(self, client: AsyncClamAVClient):
-        respx.get(f"{BASE}/api/health-check").respond(
-            json={"message": "Clamd service unavailable"}, status_code=502
-        )
+        respx.get(f"{BASE}/api/health-check").respond(json={"message": "Clamd service unavailable"}, status_code=502)
         with pytest.raises(ClamAVServiceUnavailableError):
             await client.health_check()
 
@@ -54,9 +51,7 @@ class TestVersion:
 class TestScanFile:
     @respx.mock
     async def test_clean(self, client: AsyncClamAVClient, sample_bytes: bytes):
-        respx.post(f"{BASE}/api/scan").respond(
-            json={"status": "OK", "message": "", "time": 0.001}
-        )
+        respx.post(f"{BASE}/api/scan").respond(json={"status": "OK", "message": "", "time": 0.001})
         with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as tmp:
             tmp.write(sample_bytes)
             tmp.flush()
@@ -71,17 +66,13 @@ class TestScanFile:
 class TestScanBytes:
     @respx.mock
     async def test_clean(self, client: AsyncClamAVClient, sample_bytes: bytes):
-        respx.post(f"{BASE}/api/scan").respond(
-            json={"status": "OK", "message": "", "time": 0.001}
-        )
+        respx.post(f"{BASE}/api/scan").respond(json={"status": "OK", "message": "", "time": 0.001})
         result = await client.scan_bytes(sample_bytes)
         assert result.status == "OK"
 
     @respx.mock
     async def test_bad_request(self, client: AsyncClamAVClient):
-        respx.post(f"{BASE}/api/scan").respond(
-            json={"message": "Provide a single file"}, status_code=400
-        )
+        respx.post(f"{BASE}/api/scan").respond(json={"message": "Provide a single file"}, status_code=400)
         with pytest.raises(ClamAVBadRequestError):
             await client.scan_bytes(b"")
 
@@ -89,9 +80,7 @@ class TestScanBytes:
 class TestScanStream:
     @respx.mock
     async def test_bytes(self, client: AsyncClamAVClient, sample_bytes: bytes):
-        respx.post(f"{BASE}/api/stream-scan").respond(
-            json={"status": "OK", "message": "", "time": 0.0005}
-        )
+        respx.post(f"{BASE}/api/stream-scan").respond(json={"status": "OK", "message": "", "time": 0.0005})
         result = await client.scan_stream(sample_bytes)
         assert result.status == "OK"
 
@@ -105,9 +94,7 @@ class TestScanStream:
 
     @respx.mock
     async def test_timeout(self, client: AsyncClamAVClient, sample_bytes: bytes):
-        respx.post(f"{BASE}/api/stream-scan").respond(
-            json={"message": "scan operation timed out"}, status_code=504
-        )
+        respx.post(f"{BASE}/api/stream-scan").respond(json={"message": "scan operation timed out"}, status_code=504)
         with pytest.raises(ClamAVTimeoutError):
             await client.scan_stream(sample_bytes)
 

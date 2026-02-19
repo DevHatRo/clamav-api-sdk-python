@@ -1,5 +1,7 @@
 """Tests for clamav_sdk.models."""
 
+import pytest
+
 from clamav_sdk.models import HealthCheckResult, ScanResult, VersionInfo
 
 
@@ -17,11 +19,8 @@ class TestScanResult:
 
     def test_frozen(self):
         r = ScanResult(status="OK", message="", scan_time=0.0)
-        try:
+        with pytest.raises(AttributeError):
             r.status = "FOUND"  # type: ignore[misc]
-            assert False, "Should have raised"
-        except AttributeError:
-            pass
 
 
 class TestHealthCheckResult:

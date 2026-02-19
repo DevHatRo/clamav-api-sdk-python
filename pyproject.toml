@@ -36,6 +36,7 @@ async = ["httpx>=0.24.0"]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
+    "pytest-timeout>=2.0",
     "pytest-asyncio>=0.21.0",
     "responses>=0.23.0",
     "respx>=0.20.0",
@@ -82,6 +83,12 @@ exclude_lines = [
 [tool.ruff]
 target-version = "py310"
 line-length = 120
+extend-exclude = ["clamav_sdk/_proto"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "TCH"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/test_grpc_client.py" = ["N802"]
+"clamav_sdk/grpc_client.py" = ["TC003"]
+"clamav_sdk/async_grpc_client.py" = ["TC003"]

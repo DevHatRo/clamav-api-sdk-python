@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import BinaryIO, Union
+from typing import BinaryIO
 
 import httpx
 
@@ -71,7 +71,7 @@ class AsyncClamAVClient:
             build=data.get("build", ""),
         )
 
-    async def scan_file(self, file_path: Union[str, Path]) -> ScanResult:
+    async def scan_file(self, file_path: str | Path) -> ScanResult:
         """Scan a file on disk via multipart upload.
 
         Args:
@@ -102,7 +102,7 @@ class AsyncClamAVClient:
         """
         return await self._post_multipart("/api/scan", data, filename)
 
-    async def scan_stream(self, data: Union[bytes, BinaryIO]) -> ScanResult:
+    async def scan_stream(self, data: bytes | BinaryIO) -> ScanResult:
         """Scan data via the binary stream endpoint.
 
         Args:

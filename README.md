@@ -1,6 +1,6 @@
 # clamav-sdk
 
-Python SDK for the [ClamAV API](https://github.com/clamav/clamav-api) service. Supports both REST (HTTP/JSON) and gRPC transports with synchronous and asynchronous interfaces.
+Python SDK for the [ClamAV API](https://github.com/DevHatRo/ClamAV-API) service. Supports both REST (HTTP/JSON) and gRPC transports with synchronous and asynchronous interfaces.
 
 ## Installation
 

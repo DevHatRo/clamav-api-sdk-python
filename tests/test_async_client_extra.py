@@ -20,9 +20,7 @@ BASE = "http://localhost:6000"
 class TestScanStreamBinaryIO:
     @respx.mock
     async def test_binary_io(self, sample_bytes: bytes):
-        respx.post(f"{BASE}/api/stream-scan").respond(
-            json={"status": "OK", "message": "", "time": 0.0005}
-        )
+        respx.post(f"{BASE}/api/stream-scan").respond(json={"status": "OK", "message": "", "time": 0.0005})
         async with AsyncClamAVClient(BASE) as client:
             result = await client.scan_stream(io.BytesIO(sample_bytes))
             assert result.status == "OK"

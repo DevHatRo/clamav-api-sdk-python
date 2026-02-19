@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import io
-from typing import AsyncIterator, BinaryIO, Union
+from collections.abc import AsyncIterator
+from typing import BinaryIO
 
 import grpc
 import grpc.aio
@@ -89,7 +90,7 @@ class AsyncClamAVGRPCClient:
 
     async def scan_stream(
         self,
-        data: Union[bytes, BinaryIO],
+        data: bytes | BinaryIO,
         filename: str = "",
         chunk_size: int = 65536,
     ) -> ScanResult:
@@ -104,9 +105,7 @@ class AsyncClamAVGRPCClient:
             A :class:`ScanResult` with the scan outcome.
         """
         try:
-            resp = await self._stub.ScanStream(
-                _async_chunk_iter(data, filename, chunk_size)
-            )
+            resp = await self._stub.ScanStream(_async_chunk_iter(data, filename, chunk_size))
         except grpc.aio.AioRpcError as exc:
             _handle_rpc_error(exc)
             raise
@@ -115,7 +114,7 @@ class AsyncClamAVGRPCClient:
 
     async def scan_multiple(
         self,
-        files: list[tuple[str, Union[bytes, BinaryIO]]],
+        files: list[tuple[str, bytes | BinaryIO]],
         chunk_size: int = 65536,
     ) -> AsyncIterator[ScanResult]:
         """Scan multiple files over a single bidirectional stream.
@@ -160,7 +159,7 @@ class AsyncClamAVGRPCClient:
 
 
 async def _async_chunk_iter(
-    data: Union[bytes, BinaryIO],
+    data: bytes | BinaryIO,
     filename: str,
     chunk_size: int,
 ) -> AsyncIterator[clamav_pb2.ScanStreamRequest]:

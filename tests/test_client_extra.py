@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import pytest
 import requests
 import responses
-import pytest
 
 from clamav_sdk.client import ClamAVClient
 from clamav_sdk.exceptions import ClamAVConnectionError, ClamAVTimeoutError

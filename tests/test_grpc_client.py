@@ -15,12 +15,8 @@ from clamav_sdk._proto import clamav_pb2, clamav_pb2_grpc
 from clamav_sdk.exceptions import (
     ClamAVBadRequestError,
     ClamAVConnectionError,
-    ClamAVFileTooLargeError,
-    ClamAVServiceUnavailableError,
-    ClamAVTimeoutError,
 )
 from clamav_sdk.grpc_client import ClamAVGRPCClient
-
 
 # ------------------------------------------------------------------ #
 # Fake servicer

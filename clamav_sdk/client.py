@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import BinaryIO, Union
+from typing import BinaryIO
 
 import requests
 
@@ -76,7 +76,7 @@ class ClamAVClient:
             build=data.get("build", ""),
         )
 
-    def scan_file(self, file_path: Union[str, Path]) -> ScanResult:
+    def scan_file(self, file_path: str | Path) -> ScanResult:
         """Scan a file on disk via multipart upload.
 
         Args:
@@ -111,7 +111,7 @@ class ClamAVClient:
 
         return self._post_multipart("/api/scan", io.BytesIO(data), filename)
 
-    def scan_stream(self, data: Union[bytes, BinaryIO]) -> ScanResult:
+    def scan_stream(self, data: bytes | BinaryIO) -> ScanResult:
         """Scan data via the binary stream endpoint.
 
         Sends the payload as ``application/octet-stream`` to ``/api/stream-scan``
@@ -125,7 +125,7 @@ class ClamAVClient:
         """
         if isinstance(data, bytes):
             content_length = len(data)
-            body: Union[bytes, BinaryIO] = data
+            body: bytes | BinaryIO = data
         else:
             pos = data.tell()
             data.seek(0, os.SEEK_END)
@@ -172,7 +172,7 @@ class ClamAVClient:
         self._raise_for_status(resp)
         return self._parse_scan_response(resp.json())
 
-    def _post_stream(self, path: str, body: Union[bytes, BinaryIO], headers: dict) -> ScanResult:
+    def _post_stream(self, path: str, body: bytes | BinaryIO, headers: dict) -> ScanResult:
         try:
             resp = self._session.post(
                 f"{self._base_url}{path}",

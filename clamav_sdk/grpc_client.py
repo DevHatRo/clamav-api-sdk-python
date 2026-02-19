@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import io
-from typing import BinaryIO, Iterator, Union
+from collections.abc import Iterator
+from typing import BinaryIO
 
 import grpc
 
@@ -95,7 +96,7 @@ class ClamAVGRPCClient:
 
     def scan_stream(
         self,
-        data: Union[bytes, BinaryIO],
+        data: bytes | BinaryIO,
         filename: str = "",
         chunk_size: int = 65536,
     ) -> ScanResult:
@@ -122,7 +123,7 @@ class ClamAVGRPCClient:
 
     def scan_multiple(
         self,
-        files: list[tuple[str, Union[bytes, BinaryIO]]],
+        files: list[tuple[str, bytes | BinaryIO]],
         chunk_size: int = 65536,
     ) -> list[ScanResult]:
         """Scan multiple files over a single bidirectional stream.
@@ -167,7 +168,7 @@ class ClamAVGRPCClient:
 
 
 def _chunk_iter(
-    data: Union[bytes, BinaryIO],
+    data: bytes | BinaryIO,
     filename: str,
     chunk_size: int,
 ) -> Iterator[clamav_pb2.ScanStreamRequest]:
