@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Unit Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run unit tests with coverage
+        run: |
+          pytest -m "not integration" --cov=clamav_sdk --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage
+        if: matrix.python-version == '3.13'
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Ruff check
+        run: ruff check clamav_sdk/ tests/
+
+      - name: Ruff format check
+        run: ruff format --check clamav_sdk/ tests/
+
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      clamav-api:
+        image: ghcr.io/devhatro/clamav-api:latest
+        ports:
+          - 6000:6000
+          - 9000:9000
+        env:
+          GIN_MODE: release
+          CLAMAV_DEBUG: "false"
+          CLAMAV_SOCKET: /var/run/clamav/clamd.ctl
+          CLAMAV_MAX_SIZE: "209715200"
+          CLAMAV_HOST: 0.0.0.0
+          CLAMAV_PORT: "6000"
+          CLAMAV_GRPC_PORT: "9000"
+          CLAMAV_ENABLE_GRPC: "true"
+        options: >-
+          --health-cmd "wget --spider -q http://localhost:6000/api/health-check || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 30
+          --health-start-period 120s
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Wait for ClamAV API to be ready
+        run: |
+          echo "Waiting for ClamAV API..."
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:6000/api/health-check > /dev/null 2>&1; then
+              echo "ClamAV API is ready!"
+              break
+            fi
+            echo "Attempt $i/60 - waiting 5s..."
+            sleep 5
+          done
+          curl -sf http://localhost:6000/api/health-check || (echo "ClamAV API not ready" && exit 1)
+
+      - name: Integration tests (REST)
+        run: |
+          pytest -m integration tests/test_integration_rest.py -v --timeout=300
+        env:
+          CLAMAV_REST_URL: http://localhost:6000
+
+      - name: Integration tests (gRPC)
+        run: |
+          pytest -m integration tests/test_integration_grpc.py -v --timeout=300
+        env:
+          CLAMAV_GRPC_ADDR: localhost:9000
+
+      - name: Integration tests (async REST + gRPC)
+        run: |
+          pytest -m integration tests/test_integration_async.py -v --timeout=300
+        env:
+          CLAMAV_REST_URL: http://localhost:6000
+          CLAMAV_GRPC_ADDR: localhost:9000
