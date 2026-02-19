@@ -3,6 +3,8 @@
   "release-type": "python",
   "packages": {
     ".": {
+      "include-component-in-tag": false,
+      "include-v-in-tag": true,
       "package-name": "clamav-sdk",
       "extra-files": [
         "pyproject.toml"
