@@ -5,7 +5,7 @@ import warnings
 
 from clamav_sdk._proto import clamav_pb2 as clamav__pb2
 
-GRPC_GENERATED_VERSION = '1.78.0'
+GRPC_GENERATED_VERSION = '1.84.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -25,7 +25,7 @@ if _version_not_supported:
     )
 
 
-class ClamAVScannerStub(object):
+class ClamAVScannerStub:
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -56,7 +56,7 @@ class ClamAVScannerStub(object):
                 _registered_method=True)
 
 
-class ClamAVScannerServicer(object):
+class ClamAVScannerServicer:
     """Missing associated documentation comment in .proto file."""
 
     def HealthCheck(self, request, context):
@@ -114,7 +114,7 @@ def add_ClamAVScannerServicer_to_server(servicer, server):
 
 
  # This class is part of an EXPERIMENTAL API.
-class ClamAVScanner(object):
+class ClamAVScanner:
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
