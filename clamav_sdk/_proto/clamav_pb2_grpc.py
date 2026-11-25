@@ -5,7 +5,7 @@ import warnings
 
 from clamav_sdk._proto import clamav_pb2 as clamav__pb2
 
-GRPC_GENERATED_VERSION = '1.84.0'
+GRPC_GENERATED_VERSION = '1.85.4'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
